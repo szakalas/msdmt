@@ -278,13 +278,35 @@
     .install-banner, .install-modal { display: none !important; }
   }
 
+  /* Copy summary button + toast */
+  .copy-summary-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: var(--radius);
+    background: var(--success-bg); color: var(--success-text);
+    border: 0.5px solid var(--success-border);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: filter 0.12s;
+  }
+  .copy-summary-btn:hover { filter: brightness(0.95); }
+  .copy-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--text); color: var(--bg);
+    padding: 12px 22px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    opacity: 0; transition: transform 0.3s, opacity 0.3s;
+    z-index: 2000; pointer-events: none;
+  }
+  .copy-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  @media print { .copy-summary-btn, .copy-toast { display: none !important; } }
+
 </style>
 </head>
 <body>
 <div class="page">
   <header>
     <h1>MS DMT — Klinički model odabira terapije</h1>
-    <p>Interaktivni alat za odabir terapije modifikacije bolesti u multiploj sklerozi &nbsp;·&nbsp; Dr Lorand Sakalaš, KCV Novi Sad &nbsp;·&nbsp; v1.5 (mobilna PWA verzija)</p>
+    <p>Interaktivni alat za odabir terapije modifikacije bolesti u multiploj sklerozi &nbsp;·&nbsp; Dr Lorand Sakalaš, KCV Novi Sad &nbsp;·&nbsp; v1.6 (peti krug — smernice 2025/2026)</p>
   </header>
 
   <div class="install-banner" id="installBanner">
@@ -321,6 +343,8 @@
   <div class="prog-bar" id="progBar"></div>
   <div id="stepContent"></div>
 
+  <div class="copy-toast" id="copyToast">Sažetak kopiran u clipboard</div>
+
   <footer>
     Ovaj alat je edukativni i klinički orijentisan — ne zamenjuje individualnu procenu pacijenta niti smernice MS tima.<br>
     Zasnovano na: AAN 2024 reafirmaciji, ECTRIMS/EAN smernicama, MENACTRIMS 2023, MSTCG konsenzusu, EMA SmPC, FDA prescribing information, ORATORIO i OPPORTUNITY studijama (PPMS), DISCOMS i DOT-MS (deeskalacija), French registry / Jouvenot 2024, German MS&amp;P Registry / Bsteh 2024 (postpartum), Bove 2024 (laktacija).<br>
@@ -328,7 +352,9 @@
     v1.2 — Drugi krug: ispravljena doza aktivnog uglja (BID, ne QID), DMF ALC pragovi, S1P first-dose monitoring, HBV skrining pre anti-CD20, EMA pragovi za kladribin, napomene o vakcinaciji/dojenju/PPMS.<br>
     v1.3 — Treći krug: dodati detaljni algoritmi za PPMS (ORATORIO/OPPORTUNITY), deeskalaciju kod starijih (DISCOMS, French registry, MOA-based stratifikacija) i postpartum management (German MS&amp;P Registry, anti-CD20 timing, kompatibilnost sa dojenjem).<br>
     v1.4 — Distribucija: dodati print/PDF stilovi, štampa/save-as-PDF dugme, OG meta tagovi za sharing.<br>
-    v1.5 — Mobilna PWA: app-ikone, manifest, install-banner sa platform detekcijom (iOS/Android), touch-optimizovan UI, safe area inset za iPhone notch.<br><br>
+    v1.5 — Mobilna PWA: app-ikone, manifest, install-banner sa platform detekcijom (iOS/Android), touch-optimizovan UI, safe area inset za iPhone notch.<br>
+    v1.6 — Ažuriranje smernica 2025/2026: McDonald 2024 kriterijumi (RIS scenario, CVS/PRL/kappa FLC biomarkeri), nrSPMS scenario (tolebrutinib BTK inhibitor, HERCULES), ažuriran regulatorni status tolebrutiniba (EMA uslovno / FDA CRL dec 2025), CD40L inhibitori u razvoju (frexalimab), ECTRIMS 2025 deeskalacione preporuke, funkcija "Kopiraj sažetak" za dokumentaciju.<br>
+    Reference dodate: Montalban et al, Lancet Neurol 2025;24(10):850-865 (McDonald 2024) · Androdias et al, Brain 2025;148:1459-1478 (deeskalacija) · HERCULES/GEMINI NEJM 2025 (tolebrutinib) · ECTRIMS 2025 (Carvajal, deeskalacija starijih).<br><br>
     <span style="letter-spacing: 0.18em; font-size: 13px; color: var(--text2); font-weight: 600;">NL</span>
   </footer>
 </div>
@@ -343,7 +369,11 @@ const state = {
   // De-escalation scenario
   deescDrug: null, deescFactors: [],
   // Postpartum scenario
-  ppFactors: []
+  ppFactors: [],
+  // RIS scenario
+  risFactors: [],
+  // nrSPMS scenario
+  nrspmsFactors: []
 };
 
 const STEPS_NEW = ['scenario','activity','patientFactors','result'];
@@ -351,12 +381,16 @@ const STEPS_SW  = ['scenario','currentDrug','changeReason','switchResult'];
 const STEPS_PPMS = ['scenario','ppmsAssess','ppmsResult'];
 const STEPS_DEESC = ['scenario','deescAssess','deescResult'];
 const STEPS_PP = ['scenario','ppAssess','ppResult'];
+const STEPS_RIS = ['scenario','risAssess','risResult'];
+const STEPS_NRSPMS = ['scenario','nrspmsAssess','nrspmsResult'];
 
 function steps() {
   if (state.scenario === 'switch') return STEPS_SW;
   if (state.scenario === 'ppms') return STEPS_PPMS;
   if (state.scenario === 'deescalate') return STEPS_DEESC;
   if (state.scenario === 'postpartum') return STEPS_PP;
+  if (state.scenario === 'ris') return STEPS_RIS;
+  if (state.scenario === 'nrspms') return STEPS_NRSPMS;
   return STEPS_NEW;
 }
 
@@ -365,7 +399,9 @@ const STEP_LABELS = {
   result:'Preporuka', currentDrug:'Trenutna terapija', changeReason:'Razlog promene', switchResult:'Strategija',
   ppmsAssess:'PPMS procena', ppmsResult:'PPMS preporuka',
   deescAssess:'Procena stabilnosti', deescResult:'Strategija deeskalacije',
-  ppAssess:'Postpartum procena', ppResult:'Postpartum strategija'
+  ppAssess:'Postpartum procena', ppResult:'Postpartum strategija',
+  risAssess:'RIS procena', risResult:'RIS preporuka',
+  nrspmsAssess:'nrSPMS procena', nrspmsResult:'nrSPMS preporuka'
 };
 
 function renderProgress() {
@@ -398,7 +434,8 @@ function resetAll() {
   Object.assign(state, {
     scenario:null, activityLevel:null, patientFactors:[],
     currentDrug:null, failureCriteria:[], step:0,
-    ppmsFactors:[], deescDrug:null, deescFactors:[], ppFactors:[]
+    ppmsFactors:[], deescDrug:null, deescFactors:[], ppFactors:[],
+    risFactors:[], nrspmsFactors:[]
   });
   render(); window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -447,6 +484,20 @@ scenario: () => `
         <p class="opt-desc">Planiranje DMT strategije pre i posle porođaja, kompatibilnost sa dojenjem</p>
       </div>
     </div>
+    <div class="opt ${state.scenario==='ris'?'selected':''}" onclick="state.scenario='ris';render()">
+      <span class="opt-icon">&#x1F50D;</span>
+      <div>
+        <p class="opt-title">Radiološki izolovani sindrom (RIS)</p>
+        <p class="opt-desc">Slučajni MRI nalaz bez kliničkih simptoma — procena po McDonald 2024 kriterijumima (lečiti vs. pratiti)</p>
+      </div>
+    </div>
+    <div class="opt ${state.scenario==='nrspms'?'selected':''}" onclick="state.scenario='nrspms';render()">
+      <span class="opt-icon">&#x1F9E0;</span>
+      <div>
+        <p class="opt-title">Nerelapsna sekundarno progresivna MS (nrSPMS)</p>
+        <p class="opt-desc">Progresija invaliditeta bez relapsa — smoldering neuroinflamacija, BTK inhibitori</p>
+      </div>
+    </div>
   </div>
   <div class="nav-row">
     <div></div>
@@ -480,6 +531,9 @@ activity: () => `
         <p class="opt-desc">&#8805;2 onesposobljavajuća relapsa u 12 meseci pre dijagnoze + &#8805;1 Gd+ lezija ili značajan porast T2 lezionog volumena na MRI (EMA/regulatorna definicija za DMT-naivne pacijente)</p>
       </div>
     </div>
+  </div>
+  <div class="info-box" style="margin-top:12px">
+    <p><strong>McDonald 2024 kriterijumi (Lancet Neurol 2025):</strong> Jedinstveni dijagnostički okvir za relapsni i progresivni tok. Optički nerv je sada peta anatomska lokacija za DIS. Central vein sign (CVS), paramagnetne rim lezije (PRL) i kappa slobodni laki lanci u likvoru služe kao potporni dokazi. Odmak od obavezne DIT (dissemination in time). Rezultat: ranija dijagnoza → ranija terapija. Napomena: oprez kod &gt;50 god i vaskularnih faktora rizika (rizik naddijagnoze).</p>
   </div>
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; Nazad</button>
@@ -593,6 +647,7 @@ result: () => {
   </div>
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
     <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
   </div>
 </div>`;
@@ -715,6 +770,7 @@ switchResult: () => {
   </div>
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
     <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
   </div>
 </div>`;
@@ -787,7 +843,7 @@ ppmsResult: () => {
       'OLYMPUS rituximab studija: bez efekta kod neinflamatorne PPMS.',
       'Razmotriti: simptomska terapija (spasticnost, neurogeni mokraćni mehur, umor), fizioterapija, neuropsihološka podrška.',
       'Pratiti: razvoj smoldering MS-a (PIRA-like progresija) — može se javiti i bez Gd+ lezija.',
-      'Razmotriti uključenje u registre i kliničke studije za neuroprotektivne lekove (npr. BTK inhibitori — tolebrutinib u kliničkim studijama).'
+      'Ako pacijent pređe u sekundarno progresivni nerelapsni tok (nrSPMS): razmotriti nrSPMS scenario (BTK inhibitor tolebrutinib — EMA uslovno odobren; PERSEUS studija za PPMS u toku).'
     ];
   } else if (isOver65 && !hasInflam) {
     category = 'Starost >65 god + odsustvo aktivne inflamacije';
@@ -843,6 +899,7 @@ ppmsResult: () => {
   </div>
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
     <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
   </div>
 </div>`;
@@ -991,15 +1048,17 @@ deescResult: () => {
     <p>${s.body}</p>
   </div>`).join('')}
   <div class="info-box" style="margin-top:14px">
-    <p><strong>Ključni principi deeskalacije:</strong></p>
+    <p><strong>Ključni principi deeskalacije (ECTRIMS 2025 / Brain 2025):</strong></p>
     <p style="margin-top:6px">&middot; <strong>Mehanizam delovanja > klasa efikasnosti.</strong> Anti-CD20 i fumarati: bezbedni za prekid. Cell-trafficking (NTZ, S1P): rizik rebound-a perzistira u svim uzrastima.</p>
-    <p style="margin-top:4px">&middot; <strong>Kriterijumi DISCOMS</strong>: starost &gt;55 god + ≥5 god bez relapsa + ≥3 god bez nove MRI aktivnosti.</p>
-    <p style="margin-top:4px">&middot; <strong>Posle 60. god</strong>: rizik relapsa &lt;1% (meta-analiza) — direktan prekid platformskih i anti-CD20 lekova je razuman.</p>
-    <p style="margin-top:4px">&middot; <strong>NTZ/S1P</strong>: nikad direktni prekid kod aktivnih pacijenata; tranzicija na anti-CD20 je preferovana.</p>
+    <p style="margin-top:4px">&middot; <strong>Kriterijumi</strong>: starost ≥55 god + ≥5 god bez relapsa + ≥3 god bez nove MRI aktivnosti su najvažniji za razmatranje deeskalacije (Brain 2025;148:1459).</p>
+    <p style="margin-top:4px">&middot; <strong>Posle 60. god</strong>: najniži rizik nove inflamacije nakon prekida; rizik infekcija raste eksponencijalno posle 60. god. Anti-CD20 &gt;10 god + starost &gt;60 = prekid izgleda bezbedan (ECTRIMS 2025, Carvajal).</p>
+    <p style="margin-top:4px">&middot; <strong>Posle cell-trafficking agensa (≥50 god)</strong>: prelaz na anti-CD20 ili kladribin = sličan rizik kao nastavak. Deeskalacija na slabiju terapiju povećava rizik relapsa (HR 2.45 cell-trafficking, HR 3.97 non-cell-trafficking; ECTRIMS 2025 MSBase/Italian/Swiss registri).</p>
+    <p style="margin-top:4px">&middot; <strong>Rebound rizik</strong>: natalizumab 8–22% (8–24 nedelje nakon prekida); fingolimod 10–33% (4–16 nedelja).</p>
     <p style="margin-top:4px">&middot; <strong>Monitoring posle prekida</strong>: klinika q6m + MRI godišnje × minimum 2 god. Pri svakoj sumnji na novu aktivnost: hitna ponovna procena za reuvođenje terapije.</p>
   </div>
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
     <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
   </div>
 </div>`;
@@ -1112,6 +1171,201 @@ ppResult: () => {
   </div>
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
+    <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
+  </div>
+</div>`;
+},
+
+// ============= RIS SCENARIO (McDonald 2024) =============
+
+risAssess: () => {
+  const items=[
+    ['ris_dis','DIS zadovoljen (dissemination in space)','&#8805;1 T2 lezija u &#8805;2 od 5 tipičnih lokacija: periventrikularno, kortikalno/jukstakortikalno, infratentorijalno, spinalno, optički nerv'],
+    ['ris_dit','DIT zadovoljen (dissemination in time)','Istovremeno Gd+ i Gd– lezije ILI nova T2/Gd+ lezija na kontrolnom MRI'],
+    ['ris_csf','Pozitivan likvor (OCT / povišen kappa FLC)','Oligoklonalne trake ili povišen kappa slobodni laki lanci — zamenjuju DIT po McDonald 2024'],
+    ['ris_cvs','Central vein sign (CVS) pozitivan','Potporni biomarker specifičnosti — pomaže razlikovanju od vaskularnih lezija'],
+    ['ris_prl','Paramagnetne rim lezije (PRL) prisutne','Marker hronične aktivne inflamacije (smoldering) — potporni dokaz'],
+    ['ris_highrisk','Faktori visokog rizika za konverziju','Mlađi uzrast, spinalne lezije, Gd+ lezije, povišen NfL, pozitivan likvor'],
+    ['ris_vascular','Vaskularni faktori rizika / starost >50','Oprez — povećan rizik naddijagnoze (lezije mogu biti vaskularne)'],
+  ];
+  return `
+<div class="card">
+  <p class="section-title">RIS — procena po McDonald 2024</p>
+  <p class="section-sub">Radiološki izolovani sindrom: slučajni MRI nalaz tipičnih lezija bez kliničkih simptoma. McDonald 2024 dozvoljava dijagnozu MS kod odabranih RIS pacijenata. Prirodni tok: ~19% konvertuje u 2 god, 35% u 5 god, 51% u 10 god.</p>
+  <div class="check-group">
+    ${items.map(([val,label,desc]) => {
+      const c = state.risFactors.includes(val);
+      return `<div class="chk-item ${c?'checked':''}" onclick="toggleCheck(state.risFactors,'${val}')">
+        ${CHK_ICON(c)}
+        <div>
+          <div class="chk-label">${label}</div>
+          <div class="chk-desc">${desc}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="nav-row">
+    <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="btn btn-primary" onclick="next()">Prikaži preporuku &rarr;</button>
+  </div>
+</div>`;
+},
+
+risResult: () => {
+  const f = state.risFactors;
+  const dis = f.includes('ris_dis');
+  const dit = f.includes('ris_dit');
+  const csf = f.includes('ris_csf');
+  const cvs = f.includes('ris_cvs');
+  const prl = f.includes('ris_prl');
+  const highRisk = f.includes('ris_highrisk');
+  const vascular = f.includes('ris_vascular');
+
+  // McDonald 2024 RIS -> MS: DIS + (DIT OR positive CSF OR CVS positivity)
+  const meetsMS = dis && (dit || csf || cvs);
+
+  let category, color, strategies = [];
+
+  if (meetsMS) {
+    category = 'RIS ispunjava McDonald 2024 kriterijume za MS';
+    color = 'tier-2';
+    strategies.push({warn:false, title:'Formalna dijagnoza MS je moguća',
+      body:'Pacijent zadovoljava McDonald 2024 kriterijume (DIS + DIT/pozitivan likvor/CVS). Može se postaviti formalna dijagnoza MS i razmotriti rano uvođenje DMT.<br><br><strong>Preporuka:</strong> diskusija sa pacijentom o rizicima/koristima ranog lečenja. Rana DMT kod visokorizičnog RIS-a (ARISE i TERIS studije) — teriflunomid i dimetil fumarat pokazali su odlaganje prvog kliničkog događaja.'});
+    if (highRisk) {
+      strategies.push({warn:true, title:'Faktori visokog rizika prisutni — jači argument za lečenje',
+        body:'Mlađi uzrast, spinalne/Gd+ lezije, povišen NfL i pozitivan likvor povećavaju rizik brze konverzije. U ovoj grupi rana terapija ima najveći benefit. Razmotriti platformsku terapiju (teriflunomid/DMF) ili — pri izraženoj aktivnosti — anti-CD20.'});
+    }
+  } else if (dis && !dit && !csf && !cvs) {
+    category = 'RIS — DIS zadovoljen, ali nedovoljno za MS dijagnozu';
+    color = 'tier-1';
+    strategies.push({warn:false, title:'Ne ispunjava McDonald 2024 za MS — praćenje',
+      body:'DIS je prisutan, ali bez DIT, pozitivnog likvora ili CVS pozitivnosti. Ne može se postaviti dijagnoza MS.<br><br><strong>Preporuka:</strong> aktivno praćenje — kontrolni MRI mozga za 6–12 mes, zatim godišnje. Uraditi lumbalnu punkciju (OCT/kappa FLC) — ako pozitivan, ponovo proceniti. Edukovati pacijenta o simptomima relapsa.'});
+  } else {
+    category = 'RIS — nedovoljni kriterijumi (DIS nije potvrđen)';
+    color = 'tier-1';
+    strategies.push({warn:false, title:'Praćenje i dopunska obrada',
+      body:'DIS nije potvrđen. Ovo verovatno nije RIS koji zahteva lečenje.<br><br><strong>Preporuka:</strong> isključiti druge uzroke (vaskularne lezije, migrena), MRI kontrola za 12 mes. Lumbalna punkcija ako klinička sumnja postoji.'});
+  }
+
+  if (vascular) {
+    strategies.push({warn:true, title:'Oprez: vaskularni faktori / starost >50',
+      body:'McDonald 2024 posebno upozorava na rizik naddijagnoze kod starijih i vaskularnih pacijenata. CVS (central vein sign) je ovde ključan — MS lezije imaju centralnu venu, vaskularne nemaju. Ako CVS negativan na većini lezija — posumnjati na vaskularnu etiologiju, ne MS.'});
+  }
+
+  if (prl && !meetsMS) {
+    strategies.push({warn:false, title:'PRL prisutne — smoldering marker',
+      body:'Paramagnetne rim lezije ukazuju na hroničnu aktivnu inflamaciju. Iako same ne postavljaju dijagnozu, u kontekstu RIS-a povećavaju sumnju na aktivan proces. Pojačati praćenje.'});
+  }
+
+  return `
+<div class="card">
+  <p class="section-title">RIS — preporuka</p>
+  <p class="section-sub">Algoritam zasnovan na McDonald 2024 kriterijumima (Lancet Neurol 2025) i ARISE/TERIS studijama</p>
+  <span class="tier-badge ${color}">${category}</span>
+  <div style="margin-top:10px">
+  ${strategies.map(s=>`
+  <div class="switch-card ${s.warn?'warn':''}">
+    <p class="switch-card-title">${s.warn?'&#9888;&#65039; ':'&#9432; '}${s.title}</p>
+    <p>${s.body}</p>
+  </div>`).join('')}
+  </div>
+  <div class="info-box" style="margin-top:12px">
+    <p><strong>McDonald 2024 — RIS kao MS:</strong> Dijagnoza je moguća kada je DIS + jedan od: DIT, pozitivan likvor (OCT/kappa FLC), ILI CVS pozitivnost. Ovo je paradigmatski pomak — RIS više nije samo "predklinički stadijum" već, pod uslovima, formalna dijagnoza koja omogućava rani pristup terapiji. Odluku uvek doneti kroz shared decision-making i uz oprez prema naddijagnozi.</p>
+  </div>
+  <div class="nav-row">
+    <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
+    <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
+  </div>
+</div>`;
+},
+
+// ============= nrSPMS SCENARIO =============
+
+nrspmsAssess: () => {
+  const items=[
+    ['nr_progression','Potvrđena progresija invaliditeta bez relapsa','EDSS pogoršanje nezavisno od relapsne aktivnosti (PIRA) tokom &#8805;6-12 meseci'],
+    ['nr_norelapse','Bez relapsa u poslednjih 2+ godine','Definiše "nerelapsni" tok — razlikuje od aktivne SPMS'],
+    ['nr_prl','Paramagnetne rim lezije (PRL) na MRI','Marker smoldering neuroinflamacije — tolebrutinib pokazao veću efikasnost kod PRL+'],
+    ['nr_age','Starost <60 godina','Bolji benefit/rizik profil za aktivnu terapiju'],
+    ['nr_ambulatory','Očuvana ambulantnost (EDSS <7)','Veći potencijal za usporavanje progresije'],
+    ['nr_active_spms','Superponirani relapsi ILI Gd+ lezije','Ovo je AKTIVNA SPMS — ne nrSPMS; razmotriti anti-CD20 ili siponimod'],
+  ];
+  return `
+<div class="card">
+  <p class="section-title">nrSPMS — procena</p>
+  <p class="section-sub">Nerelapsna sekundarno progresivna MS: progresija invaliditeta bez relapsne aktivnosti, vođena "smoldering" neuroinflamacijom (mikroglija, CNS-rezidentne imune ćelije). Do nedavno bez odobrene terapije.</p>
+  <div class="check-group">
+    ${items.map(([val,label,desc]) => {
+      const c = state.nrspmsFactors.includes(val);
+      return `<div class="chk-item ${c?'checked':''}" onclick="toggleCheck(state.nrspmsFactors,'${val}')">
+        ${CHK_ICON(c)}
+        <div>
+          <div class="chk-label">${label}</div>
+          <div class="chk-desc">${desc}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  <div class="nav-row">
+    <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="btn btn-primary" onclick="next()">Prikaži preporuku &rarr;</button>
+  </div>
+</div>`;
+},
+
+nrspmsResult: () => {
+  const f = state.nrspmsFactors;
+  const progression = f.includes('nr_progression');
+  const noRelapse = f.includes('nr_norelapse');
+  const prl = f.includes('nr_prl');
+  const youngerAge = f.includes('nr_age');
+  const ambulatory = f.includes('nr_ambulatory');
+  const activeSPMS = f.includes('nr_active_spms');
+
+  let strategies = [];
+
+  if (activeSPMS) {
+    strategies.push({warn:true, title:'Ovo je AKTIVNA SPMS — ne nrSPMS',
+      body:'Prisustvo superponiranih relapsa ili Gd+ lezija definiše aktivnu SPMS, koja ima drugačiji terapijski pristup.<br><br><strong>Opcije za aktivnu SPMS:</strong><br>&middot; Siponimod (Mayzent) — odobren za aktivnu SPMS (EXPAND studija).<br>&middot; Anti-CD20 (ocrelizumab) — kod izražene inflamatorne komponente.<br>&middot; Kladribin — alternativa.<br><br>Vrati se i preispitaj klasifikaciju — nrSPMS iskljucuje relapsnu aktivnost.'});
+  } else if (progression && noRelapse) {
+    strategies.push({warn:false, title:'nrSPMS potvrđen — tolebrutinib je nova opcija',
+      body:'Progresija bez relapsa uz odsustvo aktivne inflamacije definiše nrSPMS — do nedavno bez odobrene terapije.<br><br><strong>Tolebrutinib (BTK inhibitor):</strong><br>&middot; Prvi brain-penetrant BTK inhibitor koji cilja smoldering neuroinflamaciju (mikroglija + B-ćelije u CNS-u).<br>&middot; HERCULES studija (n=1131): odložio progresiju invaliditeta za <strong>31%</strong> vs placebo.<br>&middot; <strong>Regulatorni status (2026):</strong> EMA — uslovna autorizacija za nrSPMS; FDA — Complete Response Letter (dec 2025), revizija u toku; provizorno odobren u UAE.<br>&middot; Monitoring: transaminaze (hepatotoksičnost je ključni bezbednosni signal BTK inhibitora — česti ALT/AST u prvim mesecima).'});
+    if (prl) {
+      strategies.push({warn:false, title:'PRL pozitivan — potencijalno veći benefit',
+        body:'Tolebrutinib je pokazao veću efikasnost kod pacijenata sa više paramagnetnih rim lezija (marker smoldering aktivnosti). PRL+ status može identifikovati pacijente sa najvećim potencijalom odgovora.'});
+    }
+  } else if (progression && !noRelapse) {
+    strategies.push({warn:true, title:'Nedovoljno podataka o relapsnom statusu',
+      body:'Progresija je prisutna, ali relapsni status nije jasno "nerelapsni". Precizno klasifikovati: nrSPMS zahteva odsustvo relapsa. Ako ima relapsa → aktivna SPMS (vidi gore).'});
+  } else {
+    strategies.push({warn:false, title:'Nedovoljni kriterijumi za nrSPMS',
+      body:'Za nrSPMS je potrebna potvrđena progresija invaliditeta (PIRA) uz odsustvo relapsa. Preispitaj procenu.'});
+  }
+
+  // Always add supportive care + emerging therapies note
+  strategies.push({warn:false, title:'Simptomska i suportivna terapija (uvek)',
+    body:'Bez obzira na DMT odluku: fizioterapija, tretman spasticnosti, neurogenog mokraćnog mehura, umora, boli i depresije. Redovna procena kognicije. Fizička aktivnost ima dokazan benefit na progresiju i kvalitet života.'});
+
+  strategies.push({warn:false, title:'Terapije u razvoju za progresivnu MS',
+    body:'&middot; <strong>Frexalimab</strong> (CD40L inhibitor, druga generacija): faza 3 FREVIVA za nrSPMS i FREXALT za relapsnu MS u toku. Ne dovodi do deplecije limfocita. Trogodišnji podaci (CMSC 2026) pokazuju trajno nisku aktivnost.<br>&middot; <strong>Tolebrutinib PERSEUS</strong>: faza 3 studija za PPMS — rezultati očekivani.<br>&middot; Drugi BTK inhibitori (remibrutinib, fenebrutinib) u kliničkim studijama.'});
+
+  return `
+<div class="card">
+  <p class="section-title">nrSPMS — preporuka</p>
+  <p class="section-sub">Algoritam zasnovan na HERCULES/GEMINI studijama (NEJM 2025) i aktuelnom regulatornom statusu (2026)</p>
+  ${strategies.map(s=>`
+  <div class="switch-card ${s.warn?'warn':''}">
+    <p class="switch-card-title">${s.warn?'&#9888;&#65039; ':'&#9432; '}${s.title}</p>
+    <p>${s.body}</p>
+  </div>`).join('')}
+  <div class="caution-box" style="margin-top:12px">
+    <p><strong>Napomena o smoldering neuroinflamaciji:</strong> Progresija nezavisna od relapsne aktivnosti (PIRA) je vođena hroničnom aktivnom inflamacijom "iza zatvorene krvno-moždane barijere" — mikroglija, CNS-rezidentne B-ćelije, hronične aktivne lezije (PRL). Klasične anti-inflamatorne terapije (koje ciljaju perifernu imunost) imaju ograničen efekat. BTK inhibitori i CD40L inhibitori predstavljaju mehanistički pomak ka modulaciji CNS-rezidentne imunosti. Ovo je najaktivnija oblast MS istraživanja 2025-2026.</p>
+  </div>
+  <div class="nav-row">
+    <button class="btn" onclick="back()">&larr; Nazad</button>
+    <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; Kopiraj sažetak</button>
     <span class="reset-link" onclick="resetAll()">Novi pacijent</span>
   </div>
 </div>`;
@@ -1258,6 +1512,111 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       // Silent fail — SW only works when hosted; standalone HTML still works
     });
   });
+}
+
+// ============= COPY DECISION SUMMARY =============
+
+function labelForScenario(s) {
+  return ({
+    new:'Novodijagnostikovani RRMS', switch:'Pacijent na terapiji (RRMS) — promena',
+    ppms:'Primarno progresivna MS (PPMS)', deescalate:'Deeskalacija/prekid DMT (stariji)',
+    postpartum:'Postpartum strategija', ris:'Radiološki izolovani sindrom (RIS)',
+    nrspms:'Nerelapsna sekundarno progresivna MS (nrSPMS)'
+  })[s] || s;
+}
+
+function generateSummary() {
+  const S = state;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('sr-RS');
+  let lines = [];
+  lines.push('=== MS DMT — SAŽETAK PROCENE ===');
+  lines.push('Datum: ' + dateStr);
+  lines.push('Scenario: ' + labelForScenario(S.scenario));
+  lines.push('');
+
+  // Map factor codes to readable labels per scenario
+  const factorMaps = {
+    patientFactors: {preg:'Trudnoća/planiranje', jcvPos:'JCV+', liver:'Jetrena bolest', cardiac:'Srčane KI za S1P', malignancy:'Malignitet', autoimmune:'Autoimuna bolest', pml_prev:'Prethodna imunosupresija', prefer_oral:'Preferira oralno'},
+    failureCriteria: {eff_clinical:'Klinički neuspeh', eff_mri:'MRI neuspeh', prog_edss:'Progresija EDSS', jcv_risk:'JCV rizik', safety:'Bezbednost/NE', pregnancy:'Planiranje trudnoće'},
+    ppmsFactors: {ppms_age:'Starost ≤55', ppms_edss:'EDSS 3.0-6.5', ppms_duration:'Trajanje <15/<10g', ppms_inflam:'Inflamatorni komponent', ppms_age65:'Starost >65', ppms_no_inflam:'Bez inflamacije'},
+    deescFactors: {de_age60:'≥60 god', de_age55:'55-59 god', de_stable5:'≥5g bez relapsa', de_stable_mri3:'≥3g bez MRI aktivnosti', de_spms_progressive:'SPMS EDSS≥7', de_infections:'Infekcije/hipogamaglobulinemija', de_malig:'Malignitet', de_pml_risk:'PML rizik'},
+    ppFactors: {pp_active_pre:'Aktivna MS pre trudnoće', pp_ntz_pregnancy:'NTZ tokom trudnoće', pp_cd20_recent:'Anti-CD20 <6m pre koncepcije', pp_no_dmt_pre:'Bez DMT u trudnoći', pp_breastfeed:'Želi dojenje', pp_relapse_pp:'Postpartum relaps', pp_low_activity:'Niska aktivnost'},
+    risFactors: {ris_dis:'DIS+', ris_dit:'DIT+', ris_csf:'Likvor+', ris_cvs:'CVS+', ris_prl:'PRL+', ris_highrisk:'Visok rizik konverzije', ris_vascular:'Vaskularni faktori/>50g'},
+    nrspmsFactors: {nr_progression:'Progresija bez relapsa (PIRA)', nr_norelapse:'Bez relapsa 2+g', nr_prl:'PRL+', nr_age:'Starost <60', nr_ambulatory:'EDSS <7', nr_active_spms:'Aktivna SPMS (relapsi/Gd+)'}
+  };
+
+  const drugLabels = {plat:'Platforma', s1p:'S1P modulator', ntz:'Natalizumab', cd20:'Anti-CD20', cladr:'Kladribin', alem:'Alemtuzumab',
+    platform:'Platforma', anticd20:'Anti-CD20', natalizumab:'Natalizumab', cladribine:'Kladribin', alemtuzumab:'Alemtuzumab'};
+
+  if (S.scenario === 'new' && S.activityLevel) {
+    lines.push('Aktivnost bolesti: ' + ({low:'Niska/umerena',high:'Visoka',res:'RES'})[S.activityLevel]);
+  }
+  if (S.currentDrug && drugLabels[S.currentDrug]) {
+    lines.push('Trenutna terapija: ' + drugLabels[S.currentDrug]);
+  }
+  if (S.deescDrug && drugLabels[S.deescDrug]) {
+    lines.push('Trenutna terapija: ' + drugLabels[S.deescDrug]);
+  }
+
+  // Collect factors from all scenario-specific arrays
+  const collectFactors = (arr, map) => (arr||[]).map(code => map[code] || code);
+  let allFactors = [];
+  for (const key in factorMaps) {
+    if (S[key] && S[key].length) {
+      allFactors = allFactors.concat(collectFactors(S[key], factorMaps[key]));
+    }
+  }
+  if (allFactors.length) {
+    lines.push('Faktori: ' + allFactors.join('; '));
+  }
+
+  // Read result categorization from DOM (this persists on result screen)
+  const tierBadge = document.querySelector('.tier-badge');
+  const switchTitles = Array.from(document.querySelectorAll('.switch-card-title'))
+    .map(el => el.textContent.replace(/[\u26A0\uFE0F\u2139\u24D8]/g,'').trim());
+  const drugNames = Array.from(document.querySelectorAll('.drug-name')).map(el => el.textContent.trim());
+
+  if (tierBadge) {
+    lines.push('');
+    lines.push('KATEGORIJA: ' + tierBadge.textContent.trim());
+  }
+  if (switchTitles.length) {
+    lines.push('');
+    lines.push('Preporučene strategije:');
+    switchTitles.forEach(t => lines.push('  - ' + t));
+  }
+  if (drugNames.length) {
+    lines.push('');
+    lines.push('Razmatrani lekovi: ' + drugNames.join(', '));
+  }
+  lines.push('');
+  lines.push('---');
+  lines.push('Generisano: MS DMT model (Dr L. Sakalaš, KCV Novi Sad)');
+  lines.push('Edukativni alat — ne zamenjuje individualnu kliničku procenu.');
+  return lines.join('\n');
+}
+
+function copySummary() {
+  const text = generateSummary();
+  const showToast = () => {
+    const toast = document.getElementById('copyToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showToast).catch(() => fallbackCopy(text, showToast));
+  } else {
+    fallbackCopy(text, showToast);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e) {}
+  document.body.removeChild(ta);
 }
 
 render();

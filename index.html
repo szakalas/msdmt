@@ -174,6 +174,8 @@
   .tool-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 15px; border-radius:var(--radius); border:1px solid var(--border); background:var(--bg); color:var(--text2); font-size:12px; font-weight:600; cursor:pointer; box-shadow:var(--sh-sm); transition:transform 0.14s, box-shadow 0.14s, color 0.14s; }
   .tool-btn:hover { background:var(--bg2); color:var(--text); box-shadow:var(--sh-md); transform:translateY(-1px); }
   .tool-btn-icon { font-size:14px; }
+  .tool-btn-accent { background: linear-gradient(135deg, rgba(43,125,224,0.12) 0%, rgba(74,159,232,0.18) 100%); border-color: var(--brand-2); color: var(--brand-1); font-weight: 700; }
+  .tool-btn-accent:hover { background: linear-gradient(135deg, rgba(43,125,224,0.18) 0%, rgba(74,159,232,0.24) 100%); color: var(--brand-1); }
 
   /* Desktop: 2-column scenario grid + wider comfortable layout */
   @media (min-width: 720px) {
@@ -183,6 +185,57 @@
   @media (min-width: 900px) {
     .page { max-width: 960px; }
   }
+
+  /* Symptomatic therapy launch button */
+  .symptom-launch { margin: 4px 0 14px; }
+  .symptom-launch-btn { display: inline-flex; align-items: center; gap: 9px; width: 100%; justify-content: center; padding: 13px 20px; border-radius: var(--radius); border: 1px solid var(--brand-2); background: linear-gradient(135deg, rgba(43,125,224,0.10) 0%, rgba(74,159,232,0.16) 100%); color: var(--brand-1); font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: var(--sh-sm); transition: transform 0.14s, box-shadow 0.14s, filter 0.14s; }
+  .symptom-launch-btn:hover { transform: translateY(-1px); box-shadow: var(--sh-md); filter: brightness(1.03); }
+  .symptom-launch-icon { font-size: 18px; }
+
+  /* Symptom overlay */
+  .symptom-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(10,16,28,0.55); backdrop-filter: blur(4px); display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; overflow-y: auto; }
+  .symptom-overlay.show { opacity: 1; pointer-events: auto; }
+  .symptom-panel { width: 100%; max-width: 760px; background: var(--bg); background-image: var(--grad-card); border-radius: var(--radius-xl); box-shadow: var(--sh-lg); overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 48px); animation: symptomIn 0.24s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes symptomIn { from { transform: translateY(16px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+  .symptom-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 20px 24px 16px; background: var(--grad-header); color: #fff; flex-shrink: 0; }
+  .symptom-head-titles { flex: 1; }
+  .symptom-title { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.01em; line-height: 1.3; }
+  .symptom-sub { font-size: 12.5px; color: rgba(255,255,255,0.82); margin-top: 5px; line-height: 1.5; }
+  .symptom-close { flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.24); background: rgba(255,255,255,0.14); color: #fff; font-size: 22px; line-height: 1; cursor: pointer; transition: background 0.14s; display: flex; align-items: center; justify-content: center; }
+  .symptom-close:hover { background: rgba(255,255,255,0.26); }
+  .symptom-scroll { padding: 20px 24px 24px; overflow-y: auto; }
+
+  /* Symptom tiles grid */
+  .symptom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+  .symptom-tile { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 9px; padding: 18px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); box-shadow: var(--sh-sm); cursor: pointer; transition: transform 0.14s, box-shadow 0.14s, border-color 0.14s; }
+  .symptom-tile:hover { transform: translateY(-2px); box-shadow: var(--sh-md); border-color: var(--brand-2); }
+  .symptom-tile-icon { font-size: 30px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: var(--bg2); border-radius: 14px; box-shadow: var(--sh-sm); }
+  .symptom-tile-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.35; }
+
+  /* Symptom detail */
+  .symptom-intro { font-size: 13px; color: var(--text2); line-height: 1.65; padding: 13px 15px; background: var(--info-bg); border-left: 4px solid var(--info-border); border-radius: 6px var(--radius) var(--radius) 6px; margin-bottom: 16px; }
+  .symptom-intro { color: var(--info-text); }
+  .symptom-line { position: relative; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px 14px 18px; margin-bottom: 10px; background: var(--bg); box-shadow: var(--sh-sm); }
+  .symptom-line::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: var(--radius) 0 0 var(--radius); }
+  .symptom-line.st-t1::before { background: var(--tier1); }
+  .symptom-line.st-t2::before { background: var(--tier2); }
+  .symptom-line.st-t3::before { background: var(--tier3); }
+  .symptom-line-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; flex-wrap: wrap; }
+  .symptom-tier-badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.02em; text-transform: uppercase; color: #fff; flex-shrink: 0; }
+  .symptom-tier-badge.st-t1 { background: var(--tier1); }
+  .symptom-tier-badge.st-t2 { background: var(--tier2); }
+  .symptom-tier-badge.st-t3 { background: var(--tier3); }
+  .symptom-drug { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.005em; }
+  .symptom-detail { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
+  .symptom-block { border-radius: var(--radius); padding: 13px 16px; margin-top: 12px; box-shadow: var(--sh-sm); }
+  .symptom-block-title { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  .symptom-block p:not(.symptom-block-title) { font-size: 12.5px; line-height: 1.6; }
+  .symptom-combos { background: var(--info-bg); } .symptom-combos, .symptom-combos .symptom-block-title { color: var(--info-text); }
+  .symptom-nonpharm { background: var(--success-bg); } .symptom-nonpharm, .symptom-nonpharm .symptom-block-title { color: var(--success-text); }
+  .symptom-cautions { background: var(--warn-bg); } .symptom-cautions, .symptom-cautions .symptom-block-title { color: var(--warn-text); }
+  .symptom-disclaimer { font-size: 11.5px; color: var(--text3); line-height: 1.55; margin-top: 18px; padding: 11px 14px; background: var(--bg2); border-radius: var(--radius); border: 0.5px dashed var(--border2); }
+  .symptom-back-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  @media (max-width: 520px) { .symptom-grid { grid-template-columns: 1fr; } }
 
   /* Print stylesheet */
   @media print {
@@ -363,7 +416,7 @@
         <h1 id="headerTitleEl">MS DMT — Klinički model odabira terapije</h1>
       </div>
     </div>
-    <p><span id="headerSubEl">Interaktivni alat za odabir terapije modifikacije bolesti u multiploj sklerozi</span> &nbsp;·&nbsp; <span id="headerMetaEl">Dr Lorand Sakalaš, KCV Novi Sad · v1.9 (premium redizajn)</span></p>
+    <p><span id="headerSubEl">Interaktivni alat za odabir terapije modifikacije bolesti u multiploj sklerozi</span> &nbsp;·&nbsp; <span id="headerMetaEl">Dr Lorand Sakalaš, KCV Novi Sad · v2.0 (simptomatska terapija)</span></p>
   </header>
 
   <div class="install-banner" id="installBanner">
@@ -386,6 +439,9 @@
   </div>
 
   <div class="toolbar">
+    <button class="tool-btn tool-btn-accent" onclick="openSymptoms()" title="Simptomatska terapija / Symptomatic therapy" id="symptomToolBtn">
+      <span class="tool-btn-icon">&#x1F48A;</span> <span id="symptomToolLabel">Simptomatska terapija</span>
+    </button>
     <button class="tool-btn" onclick="toggleLang()" title="Promeni jezik / Change language" id="langBtn">
       <span class="tool-btn-icon">&#x1F310;</span> <span id="langBtnLabel">EN</span>
     </button>
@@ -421,6 +477,7 @@
     v1.7 — Pedijatrijski MS modul (POMS — fingolimod/PARADIGMS, rana HET, tranzicija), JCV/PML kalkulator rizika (interaktivna stratifikacija: serostatus/indeks/trajanje/imunosupresija).<br>
     v1.8 — Potpuna dvojezičnost (SR/EN): sav klinički sadržaj — procene, faktori, preporuke, doze, monitoring, napomene — prevodi se preko jezičkog dugmeta. Kompletno prepisan i18n sistem.<br>
     v1.9 — Premium grafički redizajn: gradijentno zaglavlje sa brend blokom, dubina i senke, 2-kolonski desktop layout, obojeni akcenti kartica po kontekstu, elegantnija progress traka i dugmad, poboljšane mikro-interakcije.<br>
+    v2.0 — Modul simptomatske terapije: 11 simptoma (spasticitet, bešika, umor, neuropatski bol, depresija, hod, seksualna disfunkcija, kognicija, tremor, pseudobulbarni afekt, paroksizmalni simptomi), svaki sa 1./2./3. izborom, dozama, kombinacijama, nefarmakološkim merama i napomenama. Dostupan iz svakog rezultata. Dvojezično.<br>
     Reference: Montalban et al, Lancet Neurol 2025;24(10):850-865 (McDonald 2024) · Androdias et al, Brain 2025;148:1459-1478 (deeskalacija) · HERCULES/GEMINI NEJM 2025 (tolebrutinib) · ECTRIMS 2025 (Carvajal) · PARADIGMS (fingolimod POMS) · Neurotherapeutics 2025 (POMS) · IPMSSG smernice.<br><br>
     <span style="letter-spacing: 0.18em; font-size: 13px; color: var(--text2); font-weight: 600;">NL</span>
   </footer>
@@ -442,8 +499,8 @@ const TR = {
 "Interactive tool for disease-modifying therapy selection in multiple sclerosis"
 ],
 "headerMeta": [
-"Dr Lorand Sakalaš, KCV Novi Sad · v1.9 (premium redizajn)",
-"Dr Lorand Sakalaš, UCC Vojvodina Novi Sad · v1.9 (premium redesign)"
+"Dr Lorand Sakalaš, KCV Novi Sad · v2.0 (simptomatska terapija)",
+"Dr Lorand Sakalaš, UCC Vojvodina Novi Sad · v2.0 (symptomatic therapy)"
 ],
 "print": [
 "Štampa / PDF",
@@ -2699,6 +2756,8 @@ function Lf(key, sub) {
   const idx = state.lang === 'en' ? 1 : 0;
   return node[idx][sub];
 }
+// Jezički indeks: 0 = sr, 1 = en
+function LI() { return state.lang === 'en' ? 1 : 0; }
 
 const state = {
   scenario: null, activityLevel: null,
@@ -2707,7 +2766,8 @@ const state = {
   ppmsFactors: [], deescDrug: null, deescFactors: [], ppFactors: [],
   risFactors: [], nrspmsFactors: [], pedFactors: [],
   jcvSerostatus: null, jcvIndex: null, jcvDuration: null, jcvPriorIS: null,
-  lang: 'sr'
+  lang: 'sr',
+  symptomOpen: false, activeSymptom: null
 };
 
 const STEPS_NEW = ['scenario','activity','patientFactors','result'];
@@ -2784,6 +2844,105 @@ function navRow(opts) {
   else if (opts.result) right = `<button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; ${L('ui.copySummary')}</button><span class="reset-link" onclick="resetAll()">${L('ui.newPatient')}</span>`;
   return `<div class="nav-row">${back}${right}</div>`;
 }
+
+// Symptomatic therapy launch button — shown on every result screen
+function symptomBtn() {
+  return `<div class="symptom-launch"><button class="symptom-launch-btn" onclick="openSymptoms()">
+    <span class="symptom-launch-icon">&#x1F48A;</span>
+    <span>${SYMPTOM_DATA.moduleUI.btnLabel[LI()]}</span>
+  </button></div>`;
+}
+
+const SYMPTOM_DATA = {"symptoms": [{"id": "spasticity", "icon": "&#x1F9B5;", "name": ["Spasticitet", "Spasticity"], "intro": ["Motorni simptom povezan sa lezijom gornjeg motornog neurona. Pre lečenja: identifikovati i ukloniti pogoršavajuće faktore (infekcije, dekubitus, retencija urina, konstipacija, bol, loš položaj). Napomena: kod slabih pacijenata spasticitet može pomagati pri stajanju/transferu — oprezno sa relaksacijom.", "Motor symptom related to upper motor neuron lesion. Before treatment: identify and remove aggravating factors (infections, pressure ulcers, urinary retention, constipation, pain, poor positioning). Note: in weak patients spasticity may aid standing/transfers — relax with caution."], "lines": [{"tier": "1", "drug": ["Baklofen (prvi izbor)", "Baclofen (first-line)"], "detail": ["Početna 5mg ×3/dan PO, titracija +5mg svakih 3 dana. Uobičajeno 20–80mg/dan podeljeno u 3–4 doze (max 80–120mg/dan). NE prekidati naglo (rizik napada, halucinacija, rebound spasticiteta) — postepeno smanjivati. NE: sedacija, mišićna slabost, konfuzija. Oprez kod bubrežne insuficijencije (renalna eliminacija).", "Start 5mg ×3/day PO, titrate +5mg every 3 days. Usual 20–80mg/day in 3–4 doses (max 80–120mg/day). Do NOT stop abruptly (risk of seizures, hallucinations, rebound spasticity) — taper gradually. AEs: sedation, muscle weakness, confusion. Caution in renal insufficiency (renal elimination)."]}, {"tier": "1", "drug": ["Tizanidin (prvi izbor, alternativa)", "Tizanidine (first-line alternative)"], "detail": ["Alfa-2 agonist. Početna 2mg noću, titracija do 2–4mg ×3/dan (max 36mg/dan). Prednost: manje mišićne slabosti od baklofena. NE: sedacija, suva usta, hipotenzija, hepatotoksičnost — kontrolisati ALT/AST na početku i periodično. Izbegavati uz ciprofloksacin/fluvoksamin (CYP1A2 inhibicija).", "Alpha-2 agonist. Start 2mg at night, titrate to 2–4mg ×3/day (max 36mg/day). Advantage: less muscle weakness than baclofen. AEs: sedation, dry mouth, hypotension, hepatotoxicity — check ALT/AST at baseline and periodically. Avoid with ciprofloxacin/fluvoxamine (CYP1A2 inhibition)."]}, {"tier": "2", "drug": ["Gabapentin / pregabalin (drugi izbor)", "Gabapentin / pregabalin (second-line)"], "detail": ["Korisni kada koegzistira neuropatski bol. Gabapentin 300–1200mg ×3/dan; pregabalin 75–300mg ×2/dan. NE: sedacija, vrtoglavica, edem, porast telesne mase.", "Useful when neuropathic pain coexists. Gabapentin 300–1200mg ×3/day; pregabalin 75–300mg ×2/day. AEs: sedation, dizziness, edema, weight gain."]}, {"tier": "2", "drug": ["Dantrolen (drugi izbor)", "Dantrolene (second-line)"], "detail": ["Deluje periferno (na mišić). 25mg/dan titracija do 100mg ×4/dan. Prednost: manja centralna sedacija. NE: hepatotoksičnost (obavezan monitoring jetre), mišićna slabost, dijareja.", "Acts peripherally (on muscle). 25mg/day titrated to 100mg ×4/day. Advantage: less central sedation. AEs: hepatotoxicity (mandatory liver monitoring), muscle weakness, diarrhea."]}, {"tier": "3", "drug": ["Nabiksimols (Sativex) — refraktorni spasticitet", "Nabiximols (Sativex) — refractory spasticity"], "detail": ["Oromukozni sprej THC:CBD. Add-on kod pacijenata refraktarnih na optimizovanu oralnu terapiju (baklofen/tizanidin/dantrolen). Titracija do max 12 potisaka/dan. Proba 4 nedelje — nastaviti samo ako ≥20% poboljšanje. NE: vrtoglavica, umor, dezorijentacija. Oprez: psihijatrijska anamneza.", "THC:CBD oromucosal spray. Add-on in patients refractory to optimized oral therapy (baclofen/tizanidine/dantrolene). Titrate to max 12 sprays/day. 4-week trial — continue only if ≥20% improvement. AEs: dizziness, fatigue, disorientation. Caution: psychiatric history."]}, {"tier": "3", "drug": ["Botulinski toksin A — fokalni spasticitet", "Botulinum toxin A — focal spasticity"], "detail": ["Za fokalni spasticitet (npr. adduktori, fleksori). Ciljano injektovanje pod EMG/US kontrolom. Efekat 3–4 meseca, ponavljati. Kombinuje se sa fizioterapijom. NE: prolazna slabost injektovanog mišića.", "For focal spasticity (e.g. adductors, flexors). Targeted injection under EMG/US guidance. Effect 3–4 months, repeat. Combine with physiotherapy. AEs: transient weakness of injected muscle."]}, {"tier": "3", "drug": ["Intratekalni baklofen — teški difuzni spasticitet", "Intrathecal baclofen — severe diffuse spasticity"], "detail": ["Za teški difuzni spasticitet donjih ekstremiteta refraktaran na oralnu terapiju. Implantabilna pumpa. Prednost: efikasnost uz izbegavanje sistemskih NE. Zahteva specijalizovani centar i test-dozu.", "For severe diffuse lower-limb spasticity refractory to oral therapy. Implantable pump. Advantage: efficacy while avoiding systemic AEs. Requires specialized center and test dose."]}], "combos": ["Baklofen + tizanidin: različiti mehanizmi i profili toksičnosti — kombinacija poboljšava ishod uz niže doze svakog leka. Baklofen + gabapentin korisno pri koegzistentnom neuropatskom bolu.", "Baclofen + tizanidine: different mechanisms and toxicity profiles — combination improves outcome with lower doses of each. Baclofen + gabapentin useful with coexisting neuropathic pain."], "nonPharm": ["Redovno istezanje (pasivno i aktivno), fizioterapija, vežbe. Prevencija kontraktura. Pozicioniranje i ortoze. Hidroterapija. Redukcija bola smanjuje spazam.", "Regular stretching (passive and active), physiotherapy, exercise. Contracture prevention. Positioning and orthoses. Hydrotherapy. Pain reduction decreases spasm."], "cautions": ["Uvek prvo isključiti/tretirati pogoršavajuće faktore. Ne relaksirati preterano kod pacijenata koji koriste spasticitet za transfer/stajanje.", "Always first exclude/treat aggravating factors. Do not over-relax patients who use spasticity for transfers/standing."]}, {"id": "bladder", "icon": "&#x1F6BB;", "name": ["Neurogena mokraćna bešika", "Neurogenic bladder"], "intro": ["Prvo klasifikovati tip disfunkcije: prekomerno aktivna bešika (urgencija, učestalost, urge-inkontinencija — najčešće) vs. retencija/nekompletno pražnjenje. Obavezno izmeriti rezidualni urin (bladder scan/kateterizacija) pre terapije — antiholinergik kod retencije pogoršava stanje.", "First classify dysfunction type: overactive bladder (urgency, frequency, urge incontinence — most common) vs. retention/incomplete emptying. Mandatory: measure post-void residual (bladder scan/catheterization) before therapy — anticholinergic in retention worsens it."], "lines": [{"tier": "1", "drug": ["Antiholinergici — prekomerno aktivna bešika (prvi izbor)", "Anticholinergics — overactive bladder (first-line)"], "detail": ["Oksibutinin 2.5–5mg ×2–3/dan, tolterodin 2mg ×2/dan, solifenacin 5–10mg/dan, trospijum. NE: suva usta, konstipacija, zamagljen vid, kognitivni efekti (oprez kod starijih i kognitivno oštećenih — trospijum i darifenacin manje prolaze KMB). Proveriti rezidual pre uvođenja.", "Oxybutynin 2.5–5mg ×2–3/day, tolterodine 2mg ×2/day, solifenacin 5–10mg/day, trospium. AEs: dry mouth, constipation, blurred vision, cognitive effects (caution in elderly and cognitively impaired — trospium and darifenacin cross BBB less). Check residual before starting."]}, {"tier": "2", "drug": ["Mirabegron — beta-3 agonist (drugi izbor)", "Mirabegron — beta-3 agonist (second-line)"], "detail": ["25–50mg/dan. Prednost: bez antiholinergičkih NE (dobar kod starijih i kognitivno osetljivih). NE: hipertenzija — kontrolisati TA. Može se kombinovati sa antiholinergikom kod refraktorne prekomerno aktivne bešike.", "25–50mg/day. Advantage: no anticholinergic AEs (good in elderly and cognitively vulnerable). AE: hypertension — monitor BP. Can be combined with an anticholinergic in refractory overactive bladder."]}, {"tier": "2", "drug": ["Intermitentna samokateterizacija — retencija (drugi izbor)", "Intermittent self-catheterization — retention (second-line)"], "detail": ["Zlatni standard za retenciju/nekompletno pražnjenje (rezidual >100mL). Čista intermitentna kateterizacija 4–6×/dan. Smanjuje infekcije u odnosu na trajni kateter. Edukacija pacijenta ključna.", "Gold standard for retention/incomplete emptying (residual >100mL). Clean intermittent catheterization 4–6×/day. Reduces infections compared to indwelling catheter. Patient education is key."]}, {"tier": "3", "drug": ["Botulinski toksin A u detruzor (treći izbor)", "Botulinum toxin A into detrusor (third-line)"], "detail": ["Za refraktornu prekomerno aktivnu bešiku/detruzorsku hiperaktivnost. Cistoskopska aplikacija, efekat ~6–9 meseci. NE: retencija (pacijent mora biti spreman na kateterizaciju), UTI.", "For refractory overactive bladder/detrusor overactivity. Cystoscopic application, effect ~6–9 months. AEs: retention (patient must be willing to catheterize), UTI."]}, {"tier": "3", "drug": ["Desmopresin — noćna poliurija (selektivno)", "Desmopressin — nocturnal polyuria (selective)"], "detail": ["Za izraženu nokturiju. 10–40mcg intranazalno ili PO uveče. OPREZ: hiponatremija (kontrolisati natrijum, posebno kod starijih) — ne koristiti rutinski, max jednom u 24h.", "For marked nocturia. 10–40mcg intranasal or PO at night. CAUTION: hyponatremia (monitor sodium, especially in elderly) — do not use routinely, max once in 24h."]}], "combos": ["Antiholinergik + mirabegron kod refraktorne prekomerno aktivne bešike. Kod mešovite disfunkcije (retencija + hiperaktivnost) — kateterizacija + antiholinergik.", "Anticholinergic + mirabegron in refractory overactive bladder. In mixed dysfunction (retention + overactivity) — catheterization + anticholinergic."], "nonPharm": ["Trening bešike, tempirano mokrenje, ograničenje kofeina/alkohola i večernjih tečnosti. Vežbe dna karlice. Lečenje konstipacije. Redovno isključivati UTI (pogoršava sve simptome).", "Bladder training, timed voiding, caffeine/alcohol and evening fluid restriction. Pelvic floor exercises. Treat constipation. Regularly rule out UTI (worsens all symptoms)."], "cautions": ["OBAVEZNO izmeriti rezidualni urin pre antiholinergika. UTI je čest okidač pseudorelapsa — uvek isključiti pri pogoršanju simptoma.", "MANDATORY post-void residual measurement before anticholinergics. UTI is a common pseudo-relapse trigger — always exclude when symptoms worsen."]}, {"id": "fatigue", "icon": "&#x1FAAB;", "name": ["Umor (fatigue)", "Fatigue"], "intro": ["Jedan od najčešćih i najonesposobljavajućih simptoma. Prvo isključiti sekundarne uzroke: poremećaj sna, depresija, hipotireoza, anemija, deficit vitamina D/B12, neželjeni efekti lekova (posebno antispastici, antiholinergici), infekcija. Nefarmakološke mere imaju najjaču evidenciju.", "One of the most common and disabling symptoms. First exclude secondary causes: sleep disturbance, depression, hypothyroidism, anemia, vitamin D/B12 deficiency, drug side effects (especially antispastics, anticholinergics), infection. Non-pharmacological measures have the strongest evidence."], "lines": [{"tier": "1", "drug": ["Nefarmakološke mere (prvi izbor)", "Non-pharmacological measures (first-line)"], "detail": ["Aerobna vežba i vežbe otpora imaju NAJJAČU evidenciju. Energy conservation/pacing tehnike. Kognitivno-bihejvioralna terapija. Higijena sna. Hlađenje (cooling) kod toplotne osetljivosti. Adresiranje ovih faktora često daje veći efekat od lekova.", "Aerobic and resistance exercise have the STRONGEST evidence. Energy conservation/pacing techniques. Cognitive behavioral therapy. Sleep hygiene. Cooling for heat sensitivity. Addressing these factors often yields greater effect than medications."]}, {"tier": "2", "drug": ["Amantadin (drugi izbor)", "Amantadine (second-line)"], "detail": ["100mg ×2/dan (druga doza ne kasno popodne — nesanica). Skromna evidencija ali najčešće korišćen. NE: nesanica, živid snovi, livedo reticularis, edem skočnih zglobova, konfuzija. Napomena: TRIUMPHANT-MS studija nije pokazala superiornost nad placebom — koristiti kritički.", "100mg ×2/day (second dose not late afternoon — insomnia). Modest evidence but most commonly used. AEs: insomnia, vivid dreams, livedo reticularis, ankle edema, confusion. Note: the TRIUMPHANT-MS trial showed no superiority over placebo — use critically."]}, {"tier": "2", "drug": ["Modafinil (drugi izbor, posebno uz somnolenciju)", "Modafinil (second-line, especially with somnolence)"], "detail": ["100–200mg ujutru (max 400mg). Korisniji kad postoji izražena dnevna pospanost. NE: glavobolja, nervoza, nesanica, hipertenzija. Smanjuje efikasnost oralnih kontraceptiva. Evidencija mešovita.", "100–200mg in the morning (max 400mg). More useful with marked daytime sleepiness. AEs: headache, nervousness, insomnia, hypertension. Reduces oral contraceptive efficacy. Mixed evidence."]}, {"tier": "3", "drug": ["Ostale opcije (selektivno)", "Other options (selective)"], "detail": ["Metilfenidat, L-karnitin (posebno kod deficita ili umora indukovanog lekovima), SSRI ako umor prati depresiju. Fampridin može poboljšati umor kao sekundarni efekat kod pacijenata sa poremećajem hoda.", "Methylphenidate, L-carnitine (especially in deficiency or drug-induced fatigue), SSRI if fatigue accompanies depression. Fampridine may improve fatigue as a secondary effect in patients with gait impairment."]}], "combos": ["Nefarmakološke mere + farmakoterapija uvek zajedno. Lečenje koegzistentne depresije/poremećaja sna često znatno smanjuje umor.", "Non-pharmacological measures + pharmacotherapy always together. Treating coexisting depression/sleep disorder often substantially reduces fatigue."], "nonPharm": ["Strukturisana aerobna vežba. Pacing i planiranje aktivnosti. Cooling tehnike/oblačenje. Optimizacija sna. Izbegavanje pregrejavanja (Uhthoff).", "Structured aerobic exercise. Pacing and activity planning. Cooling techniques/garments. Sleep optimization. Avoid overheating (Uhthoff)."], "cautions": ["Uvek prvo isključiti i lečiti sekundarne uzroke — često su reverzibilni. Kritički proceniti korist amantadina (slaba evidencija).", "Always first exclude and treat secondary causes — often reversible. Critically assess amantadine benefit (weak evidence)."]}, {"id": "neuropathic_pain", "icon": "&#x26A1;", "name": ["Neuropatski bol", "Neuropathic pain"], "intro": ["Hronični dizestetički bol (najčešće donji ekstremiteti), paroksizmalni bol, trigeminalna neuralgija, Lhermitteov znak. Razlikovati od nociceptivnog/muskuloskeletnog bola (sekundaran imobilnosti, spasticitetu — drugačiji tretman). Tonički bolni spazmi se preklapaju sa spasticitetom.", "Chronic dysesthetic pain (usually lower limbs), paroxysmal pain, trigeminal neuralgia, Lhermitte's sign. Distinguish from nociceptive/musculoskeletal pain (secondary to immobility, spasticity — different treatment). Tonic painful spasms overlap with spasticity."], "lines": [{"tier": "1", "drug": ["Gabapentin / pregabalin (prvi izbor)", "Gabapentin / pregabalin (first-line)"], "detail": ["Gabapentin 300mg titracija do 1200mg ×3/dan (max 3600mg/dan). Pregabalin 75mg ×2 do 300mg ×2/dan. NE: sedacija, vrtoglavica, edem, porast telesne mase. Prilagoditi dozu kod bubrežne insuficijencije.", "Gabapentin 300mg titrated to 1200mg ×3/day (max 3600mg/day). Pregabalin 75mg ×2 to 300mg ×2/day. AEs: sedation, dizziness, edema, weight gain. Adjust dose in renal insufficiency."]}, {"tier": "1", "drug": ["Duloksetin (prvi izbor, alternativa)", "Duloxetine (first-line alternative)"], "detail": ["SNRI, 30mg titracija do 60mg/dan (max 120mg). Jedini antidepresiv koji je FDA odobrio za neuropatski bol. Prednost kad koegzistira depresija. NE: mučnina, suva usta, somnolencija, umor.", "SNRI, 30mg titrated to 60mg/day (max 120mg). The only antidepressant FDA-approved for neuropathic pain. Advantage when depression coexists. AEs: nausea, dry mouth, somnolence, fatigue."]}, {"tier": "2", "drug": ["Amitriptilin / triciklici (drugi izbor)", "Amitriptyline / tricyclics (second-line)"], "detail": ["10–75mg noću. Korisno kad je bol udružen sa nesanicom. NE: antiholinergički efekti (suva usta, retencija urina — oprez kod neurogene bešike!), sedacija, ortostatska hipotenzija, kardiotoksičnost. Oprez kod starijih.", "10–75mg at night. Useful when pain is associated with insomnia. AEs: anticholinergic effects (dry mouth, urinary retention — caution in neurogenic bladder!), sedation, orthostatic hypotension, cardiotoxicity. Caution in elderly."]}, {"tier": "3", "drug": ["Karbamazepin — trigeminalna neuralgija (specifično)", "Carbamazepine — trigeminal neuralgia (specific)"], "detail": ["Prvi izbor ZA trigeminalnu neuralgiju i paroksizmalne simptome. 100mg ×2 titracija do 200mg ×3–4/dan. NE: hiponatremija, sedacija, ataksija, osip (rizik SJS — HLA-B*1502 kod azijske populacije), supresija kostne srži. Okskarbazepin bolje podnošljiv. Monitoring: KKS, natrijum, jetra.", "First-line FOR trigeminal neuralgia and paroxysmal symptoms. 100mg ×2 titrated to 200mg ×3–4/day. AEs: hyponatremia, sedation, ataxia, rash (SJS risk — HLA-B*1502 in Asian populations), bone marrow suppression. Oxcarbazepine better tolerated. Monitoring: CBC, sodium, liver."]}, {"tier": "3", "drug": ["Nabiksimols / kanabinoidi (treći izbor)", "Nabiximols / cannabinoids (third-line)"], "detail": ["Za refraktorni centralni neuropatski bol, add-on. Umerena evidencija. NE: vrtoglavica, umor, psihoaktivni efekti.", "For refractory central neuropathic pain, add-on. Moderate evidence. AEs: dizziness, fatigue, psychoactive effects."]}], "combos": ["Gabapentinoid + SNRI/triciklik pri nedovoljnom odgovoru monoterapije (različiti mehanizmi). Za tonične bolne spazme — kombinovati sa antispasticima (baklofen).", "Gabapentinoid + SNRI/tricyclic when monotherapy response is inadequate (different mechanisms). For tonic painful spasms — combine with antispastics (baclofen)."], "nonPharm": ["Transkutana električna nervna stimulacija (TENS), fizička aktivnost, kognitivno-bihejvioralna terapija, tehnike relaksacije. Lečenje koegzistentne depresije i poremećaja sna.", "Transcutaneous electrical nerve stimulation (TENS), physical activity, cognitive behavioral therapy, relaxation techniques. Treat coexisting depression and sleep disturbance."], "cautions": ["Razlikovati neuropatski od nociceptivnog bola — tretman se razlikuje. Triciklici pogoršavaju neurogenu retenciju urina.", "Distinguish neuropathic from nociceptive pain — treatment differs. Tricyclics worsen neurogenic urinary retention."]}, {"id": "depression", "icon": "&#x1F614;", "name": ["Depresija i anksioznost", "Depression and anxiety"], "intro": ["Visoka prevalencija u MS (do 50% tokom života), nedovoljno prepoznata i lečena. Povezana sa lošijom adherencijom DMT, umorom i kognicijom. Aktivno skrinirati (npr. PHQ-9). Rizik suicida povišen — proceniti. Neki DMT (interferon) mogu doprineti — razmotriti.", "High prevalence in MS (up to 50% lifetime), under-recognized and undertreated. Associated with poorer DMT adherence, fatigue and cognition. Screen actively (e.g. PHQ-9). Suicide risk elevated — assess. Some DMTs (interferon) may contribute — consider."], "lines": [{"tier": "1", "drug": ["SSRI (prvi izbor)", "SSRI (first-line)"], "detail": ["Sertralin 50–200mg/dan, escitalopram 10–20mg/dan. Dobro podnošljivi. Prednost kod koegzistentne anksioznosti. NE: GI tegobe, seksualna disfunkcija (već čest MS simptom — razmotriti), inicijalno pojačanje anksioznosti. Escitalopram: oprez zbog QTc.", "Sertraline 50–200mg/day, escitalopram 10–20mg/day. Well tolerated. Advantage with coexisting anxiety. AEs: GI upset, sexual dysfunction (already a common MS symptom — consider), initial anxiety increase. Escitalopram: caution re QTc."]}, {"tier": "2", "drug": ["SNRI (drugi izbor / dvostruka korist)", "SNRI (second-line / dual benefit)"], "detail": ["Venlafaksin, duloksetin 60mg/dan. Prednost: istovremeno lečenje neuropatskog bola i/ili umora. NE: hipertenzija (venlafaksin), mučnina.", "Venlafaxine, duloxetine 60mg/day. Advantage: simultaneous treatment of neuropathic pain and/or fatigue. AEs: hypertension (venlafaxine), nausea."]}, {"tier": "3", "drug": ["Bupropion — uz izražen umor (selektivno)", "Bupropion — with marked fatigue (selective)"], "detail": ["Aktivirajući profil, korisno kad depresija prati izražen umor i psihomotornu usporenost. NE: snižava prag za napade (oprez), nesanica, agitacija.", "Activating profile, useful when depression accompanies marked fatigue and psychomotor slowing. AEs: lowers seizure threshold (caution), insomnia, agitation."]}], "combos": ["Farmakoterapija + psihoterapija (KBT) je optimalno. Kod anksioznosti izbegavati dugoročne benzodiazepine (sedacija, pad, kognicija).", "Pharmacotherapy + psychotherapy (CBT) is optimal. For anxiety avoid long-term benzodiazepines (sedation, falls, cognition)."], "nonPharm": ["Kognitivno-bihejvioralna terapija (jaka evidencija), fizička aktivnost, podrška, mindfulness. Lečenje umora i poremećaja sna.", "Cognitive behavioral therapy (strong evidence), physical activity, support, mindfulness. Treat fatigue and sleep disturbance."], "cautions": ["Aktivno proceniti suicidalni rizik. SSRI-indukovana seksualna disfunkcija se preklapa sa MS simptomom — otvoreno razgovarati.", "Actively assess suicide risk. SSRI-induced sexual dysfunction overlaps with an MS symptom — discuss openly."]}, {"id": "gait", "icon": "&#x1F6B6;", "name": ["Poremećaj hoda", "Gait impairment"], "intro": ["Multifaktorski: slabost, spasticitet, ataksija, propriocepcija, umor. Prvo optimizovati doprinoseće faktore (spasticitet, umor). Fizioterapija je osnova. Dalfampridin je jedini lek specifično odobren za poboljšanje hoda.", "Multifactorial: weakness, spasticity, ataxia, proprioception, fatigue. First optimize contributing factors (spasticity, fatigue). Physiotherapy is the foundation. Dalfampridine is the only drug specifically approved to improve walking."], "lines": [{"tier": "1", "drug": ["Fizioterapija i pomagala (prvi izbor)", "Physiotherapy and aids (first-line)"], "detail": ["Procena od strane fizioterapeuta specijalizovanog za hod. Vežbe snage, ravnoteže, hoda. Pomagala (štap, hodalica), ortoze (AFO kod stopala koje visi). Osnova svakog pristupa — uvek uz farmakoterapiju.", "Assessment by a gait-specialized physiotherapist. Strength, balance and gait exercises. Aids (cane, walker), orthoses (AFO for foot drop). Foundation of every approach — always alongside pharmacotherapy."]}, {"tier": "2", "drug": ["Dalfampridin / fampridin (drugi izbor)", "Dalfampridine / fampridine (second-line)"], "detail": ["Blokator kalijumskih kanala. 10mg ×2/dan, tačno na 12h razmaka, na prazan stomak. Poboljšava brzinu hoda kod ~1/3 pacijenata — proba 2 nedelje, nastaviti samo kod respondera (T25FW). KONTRAINDIKACIJE: anamneza napada (snižava prag!), umerena-teška bubrežna insuficijencija (eGFR ≤50). NE prekoračiti dozu i NE nadoknađivati propuštenu (rizik napada). Kontrolisati bubrežnu funkciju.", "Potassium channel blocker. 10mg ×2/day, exactly 12h apart, on an empty stomach. Improves walking speed in ~1/3 of patients — 2-week trial, continue only in responders (T25FW). CONTRAINDICATIONS: seizure history (lowers threshold!), moderate-severe renal insufficiency (eGFR ≤50). Do NOT exceed dose and do NOT make up a missed dose (seizure risk). Monitor renal function."]}], "combos": ["Dalfampridin + fizioterapija. Optimizovati spasticitet i umor (svaki doprinosi hodu) pre procene odgovora na dalfampridin.", "Dalfampridine + physiotherapy. Optimize spasticity and fatigue (each contributes to gait) before assessing dalfampridine response."], "nonPharm": ["Trening hoda i ravnoteže, jačanje, funkcionalna elektrostimulacija (FES) kod stopala koje visi, ortoze, pomagala. Redovna fizička aktivnost.", "Gait and balance training, strengthening, functional electrical stimulation (FES) for foot drop, orthoses, aids. Regular physical activity."], "cautions": ["Dalfampridin: strogo poštovati kontraindikacije (napadi, bubreg) i doziranje. Proba 2 nedelje — ne nastavljati kod non-respondera.", "Dalfampridine: strictly observe contraindications (seizures, kidney) and dosing. 2-week trial — do not continue in non-responders."]}, {"id": "sexual", "icon": "&#x1F495;", "name": ["Seksualna disfunkcija", "Sexual dysfunction"], "intro": ["Česta ali retko spontano prijavljena — aktivno pitati. Primarna (direktno neurološka), sekundarna (drugi MS simptomi — spasticitet, bešika, umor, bol) i tercijarna (psihosocijalna). Isključiti doprinos lekova (SSRI, antihipertenzivi).", "Common but rarely spontaneously reported — ask actively. Primary (directly neurological), secondary (other MS symptoms — spasticity, bladder, fatigue, pain) and tertiary (psychosocial). Exclude drug contribution (SSRIs, antihypertensives)."], "lines": [{"tier": "1", "drug": ["PDE5 inhibitori — erektilna disfunkcija (prvi izbor)", "PDE5 inhibitors — erectile dysfunction (first-line)"], "detail": ["Sildenafil 25–100mg po potrebi, tadalafil 10–20mg (duže dejstvo, ili 5mg dnevno). Dobra evidencija za erektilnu disfunkciju kod MS. NE: glavobolja, crvenilo, nazalna kongestija. KONTRAINDIKACIJA: nitrati (hipotenzija).", "Sildenafil 25–100mg as needed, tadalafil 10–20mg (longer acting, or 5mg daily). Good evidence for erectile dysfunction in MS. AEs: headache, flushing, nasal congestion. CONTRAINDICATION: nitrates (hypotension)."]}, {"tier": "2", "drug": ["Pristup kod žena (drugi izbor)", "Approach in women (second-line)"], "detail": ["Lubrikanti/vlažioci za suvoću. Lečenje doprinoseće bešike, spasticiteta, bola. Vibrostimulacija. Evidencija za farmakoterapiju ograničena. Adresirati psihosocijalne faktore.", "Lubricants/moisturizers for dryness. Treat contributing bladder, spasticity, pain. Vibrostimulation. Evidence for pharmacotherapy limited. Address psychosocial factors."]}, {"tier": "3", "drug": ["Sekundarni/tercijarni faktori (uvek adresirati)", "Secondary/tertiary factors (always address)"], "detail": ["Optimizovati spasticitet (baklofen pre odnosa), pražnjenje bešike pre odnosa, umor (planiranje). Prilagoditi/zameniti SSRI koji doprinosi. Savetovanje para, psihoterapija.", "Optimize spasticity (baclofen before intercourse), bladder emptying before intercourse, fatigue (planning). Adjust/switch a contributing SSRI. Couple counseling, psychotherapy."]}], "combos": ["PDE5 inhibitor + adresiranje sekundarnih faktora (bešika, spasticitet). Multidisciplinarni pristup (urolog, seksualni terapeut).", "PDE5 inhibitor + addressing secondary factors (bladder, spasticity). Multidisciplinary approach (urologist, sex therapist)."], "nonPharm": ["Edukacija i savetovanje para. Planiranje (umor, spasticitet). Adresiranje psihosocijalnih i partnerskih faktora.", "Education and couple counseling. Planning (fatigue, spasticity). Address psychosocial and relationship factors."], "cautions": ["Aktivno pitati — pacijenti retko spontano prijave. Isključiti doprinos lekova.", "Ask actively — patients rarely report spontaneously. Exclude drug contribution."]}, {"id": "cognitive", "icon": "&#x1F9E0;", "name": ["Kognitivna disfunkcija", "Cognitive dysfunction"], "intro": ["Pogađa do 65% pacijenata — najčešće brzina obrade informacija, radna memorija, egzekutivne funkcije. Skrinirati (SDMT — Symbol Digit Modalities Test). Nema odobrenog leka specifično za MS kognitivnu disfunkciju — fokus na rehabilitaciju i lečenje doprinoseće faktora.", "Affects up to 65% of patients — most often information processing speed, working memory, executive function. Screen (SDMT — Symbol Digit Modalities Test). No approved drug specifically for MS cognitive dysfunction — focus on rehabilitation and treating contributing factors."], "lines": [{"tier": "1", "drug": ["Kognitivna rehabilitacija (prvi izbor)", "Cognitive rehabilitation (first-line)"], "detail": ["Najjača evidencija. Kompjuterizovani i strukturirani programi treninga (posebno za memoriju i brzinu obrade). Kompenzatorne strategije. Radna/okupaciona terapija.", "Strongest evidence. Computerized and structured training programs (especially for memory and processing speed). Compensatory strategies. Occupational therapy."]}, {"tier": "1", "drug": ["Lečenje doprinoseće faktora (prvi izbor)", "Treat contributing factors (first-line)"], "detail": ["Depresija, umor i poremećaj sna značajno pogoršavaju kogniciju — njihovo lečenje često poboljšava kognitivne pritužbe. Revidirati lekove sa antiholinergičkim/sedativnim efektom.", "Depression, fatigue and sleep disturbance significantly worsen cognition — treating them often improves cognitive complaints. Review drugs with anticholinergic/sedative effect."]}, {"tier": "2", "drug": ["Fizička aktivnost (drugi izbor)", "Physical activity (second-line)"], "detail": ["Aerobna vežba pokazuje pozitivan efekat na kogniciju i neuroplastičnost. Deo sveobuhvatnog pristupa.", "Aerobic exercise shows a positive effect on cognition and neuroplasticity. Part of a comprehensive approach."]}, {"tier": "3", "drug": ["Farmakoterapija (bez odobrene opcije)", "Pharmacotherapy (no approved option)"], "detail": ["Donepezil, memantin, metilfenidat, modafinil — ispitivani ali BEZ konzistentne evidencije za MS kognitivnu disfunkciju. Ne preporučuju se rutinski. Kontrola aktivnosti bolesti (DMT) je najvažnija dugoročna mera.", "Donepezil, memantine, methylphenidate, modafinil — studied but WITHOUT consistent evidence for MS cognitive dysfunction. Not routinely recommended. Disease activity control (DMT) is the most important long-term measure."]}], "combos": ["Kognitivna rehabilitacija + fizička aktivnost + lečenje depresije/umora. Optimalna kontrola bolesti DMT-om.", "Cognitive rehabilitation + physical activity + treating depression/fatigue. Optimal disease control with DMT."], "nonPharm": ["Kognitivni trening, kompenzatorne strategije, aerobna vežba, mentalna aktivnost, lečenje depresije/umora/sna.", "Cognitive training, compensatory strategies, aerobic exercise, mental activity, treating depression/fatigue/sleep."], "cautions": ["Nema leka odobrenog za MS kognitivnu disfunkciju. Prvo lečiti reverzibilne doprinoseće faktore.", "No drug approved for MS cognitive dysfunction. First treat reversible contributing factors."]}, {"id": "tremor", "icon": "&#x1F30A;", "name": ["Tremor i ataksija", "Tremor and ataxia"], "intro": ["Među najteže lečivim MS simptomima, obično zbog lezija cerebeluma/cerebelarnih puteva. Farmakoterapija je često razočaravajuća. Fokus na funkcionalne strategije i rehabilitaciju.", "Among the most difficult MS symptoms to treat, usually due to cerebellar/cerebellar-pathway lesions. Pharmacotherapy is often disappointing. Focus on functional strategies and rehabilitation."], "lines": [{"tier": "1", "drug": ["Rehabilitacija i funkcionalne strategije (prvi izbor)", "Rehabilitation and functional strategies (first-line)"], "detail": ["Okupaciona terapija, opterećenje ekstremiteta (weighting), adaptivna pomagala, stabilizacione tehnike. Najkorisniji pristup za većinu pacijenata.", "Occupational therapy, limb weighting, adaptive aids, stabilization techniques. The most useful approach for most patients."]}, {"tier": "2", "drug": ["Farmakoterapija (drugi izbor, ograničena)", "Pharmacotherapy (second-line, limited)"], "detail": ["Probni pokušaji (slaba evidencija): propranolol, primidon, klonazepam, gabapentin, topiramat. Očekivanja umerena — dokumentovati odgovor objektivno. NE variraju po leku (sedacija, itd.).", "Trial attempts (weak evidence): propranolol, primidone, clonazepam, gabapentin, topiramate. Expectations modest — document response objectively. AEs vary by drug (sedation, etc.)."]}, {"tier": "3", "drug": ["Duboka moždana stimulacija (treći izbor, selektivno)", "Deep brain stimulation (third-line, selective)"], "detail": ["Talamička DBS (VIM) za teški, onesposobljavajući, refraktarni tremor kod pažljivo odabranih pacijenata. Specijalizovani centar. Efekat varijabilan u MS (za razliku od esencijalnog tremora).", "Thalamic DBS (VIM) for severe, disabling, refractory tremor in carefully selected patients. Specialized center. Effect variable in MS (unlike essential tremor)."]}], "combos": ["Rehabilitacija je osnova; farmakoterapija kao dodatak sa umerenim očekivanjima.", "Rehabilitation is the foundation; pharmacotherapy as an adjunct with modest expectations."], "nonPharm": ["Okupaciona terapija, opterećenje ekstremiteta, adaptivna pomagala i pribor, stabilizacione tehnike.", "Occupational therapy, limb weighting, adaptive aids and utensils, stabilization techniques."], "cautions": ["Realno postaviti očekivanja — često slab odgovor. Dokumentovati odgovor objektivno pre nastavka leka.", "Set realistic expectations — often poor response. Document response objectively before continuing a drug."]}, {"id": "pba", "icon": "&#x1F62D;", "name": ["Pseudobulbarni afekt", "Pseudobulbar affect"], "intro": ["Nekontrolisani napadi smeha ili plača neusklađeni sa raspoloženjem/situacijom. Razlikovati od depresije (iako mogu koegzistirati). Uznemirava pacijenta i okolinu — prepoznavanje je važno jer se dobro leči.", "Uncontrolled episodes of laughing or crying incongruent with mood/situation. Distinguish from depression (though they can coexist). Distressing to patient and others — recognition matters because it responds well to treatment."], "lines": [{"tier": "1", "drug": ["Dekstrometorfan/kvinidin (prvi izbor, gde je dostupno)", "Dextromethorphan/quinidine (first-line, where available)"], "detail": ["Jedina kombinacija specifično odobrena (FDA) za pseudobulbarni afekt. 20mg/10mg ×1–2/dan. NE: vrtoglavica, dijareja. OPREZ: QTc produženje (kvinidin), interakcije (CYP2D6). Dostupnost varira po regionu.", "The only combination specifically approved (FDA) for pseudobulbar affect. 20mg/10mg ×1–2/day. AEs: dizziness, diarrhea. CAUTION: QTc prolongation (quinidine), interactions (CYP2D6). Availability varies by region."]}, {"tier": "2", "drug": ["SSRI / triciklici (drugi izbor, široko dostupno)", "SSRI / tricyclics (second-line, widely available)"], "detail": ["Često prvi praktični izbor gde dekstrometorfan/kvinidin nije dostupan. SSRI (sertralin, citalopram) ili niske doze amitriptilina. Efekat obično brži i pri nižim dozama nego za depresiju.", "Often the first practical choice where dextromethorphan/quinidine is unavailable. SSRI (sertraline, citalopram) or low-dose amitriptyline. Effect usually faster and at lower doses than for depression."]}], "combos": ["Ako koegzistira depresija, SSRI može lečiti oba. Retko potrebna kombinacija.", "If depression coexists, an SSRI may treat both. Combination rarely needed."], "nonPharm": ["Edukacija pacijenta i porodice (razumevanje da je neurološki, ne emocionalni fenomen) značajno smanjuje distres.", "Patient and family education (understanding it is a neurological, not emotional phenomenon) significantly reduces distress."], "cautions": ["Razlikovati od depresije. Dekstrometorfan/kvinidin: proveriti QTc i interakcije.", "Distinguish from depression. Dextromethorphan/quinidine: check QTc and interactions."]}, {"id": "paroxysmal", "icon": "&#x26A1;", "name": ["Paroksizmalni simptomi", "Paroxysmal symptoms"], "intro": ["Kratki, stereotipni, ponavljajući napadi: tonički spazmi, dizartrija/ataksija, paroksizmalni pruritus, Lhermitteov znak, trigeminalna neuralgija. Posreduju ih efaptička transmisija u demijelinizovanim aksonima. Odlično reaguju na blokatore natrijumskih kanala.", "Brief, stereotyped, recurrent episodes: tonic spasms, dysarthria/ataxia, paroxysmal pruritus, Lhermitte's sign, trigeminal neuralgia. Mediated by ephaptic transmission in demyelinated axons. Respond well to sodium channel blockers."], "lines": [{"tier": "1", "drug": ["Karbamazepin (prvi izbor)", "Carbamazepine (first-line)"], "detail": ["Vrlo efikasan, često pri niskim dozama. 100mg ×1–2 titracija do 200mg ×2–3/dan. NE: hiponatremija, sedacija, ataksija, osip (SJS rizik — HLA-B*1502), supresija koštane srži. Monitoring: KKS, natrijum, jetra. Često se može smanjiti/ukinuti nakon remisije.", "Very effective, often at low doses. 100mg ×1–2 titrated to 200mg ×2–3/day. AEs: hyponatremia, sedation, ataxia, rash (SJS risk — HLA-B*1502), bone marrow suppression. Monitoring: CBC, sodium, liver. Often can be reduced/stopped after remission."]}, {"tier": "2", "drug": ["Okskarbazepin / drugi antikonvulzivi (drugi izbor)", "Oxcarbazepine / other anticonvulsants (second-line)"], "detail": ["Okskarbazepin (bolje podnošljiv, manje interakcija), lamotrigin, gabapentin, fenitoin. Za pacijente koji ne podnose karbamazepin.", "Oxcarbazepine (better tolerated, fewer interactions), lamotrigine, gabapentin, phenytoin. For patients who do not tolerate carbamazepine."]}, {"tier": "3", "drug": ["Refraktorna trigeminalna neuralgija (treći izbor)", "Refractory trigeminal neuralgia (third-line)"], "detail": ["Baklofen kao dodatak. Kod refraktorne trigeminalne neuralgije — neurohirurške opcije (mikrovaskularna dekompresija manje relevantna u MS; gama-nož, rizotomija). Uputiti na specijalizovani centar.", "Baclofen as an adjunct. For refractory trigeminal neuralgia — neurosurgical options (microvascular decompression less relevant in MS; gamma knife, rhizotomy). Refer to a specialized center."]}], "combos": ["Karbamazepin je obično dovoljan kao monoterapija. Baklofen kao dodatak kod trigeminalne neuralgije.", "Carbamazepine is usually sufficient as monotherapy. Baclofen as an adjunct in trigeminal neuralgia."], "nonPharm": ["Prepoznati i izbegavati okidače (npr. dodir kod trigeminalne neuralgije). Edukacija — simptomi su često prolazni i reaguju na terapiju.", "Identify and avoid triggers (e.g. touch in trigeminal neuralgia). Education — symptoms are often transient and respond to therapy."], "cautions": ["Novi paroksizmalni simptomi mogu signalizirati aktivnost bolesti — proceniti. Karbamazepin: monitoring natrijuma i KKS.", "New paroxysmal symptoms may signal disease activity — assess. Carbamazepine: monitor sodium and CBC."]}], "moduleUI": {"btnLabel": ["Simptomatska terapija", "Symptomatic therapy"], "title": ["Simptomatska terapija MS-a", "Symptomatic therapy in MS"], "sub": ["Izaberite simptom za detaljan pregled terapijskih opcija (prvi/drugi/treći izbor), kombinacija i nefarmakoloških mera.", "Select a symptom for a detailed overview of treatment options (first/second/third-line), combinations and non-pharmacological measures."], "backToApp": ["Nazad na alat", "Back to tool"], "tier1": ["1. izbor", "1st-line"], "tier2": ["2. izbor", "2nd-line"], "tier3": ["3. izbor / specijalizovano", "3rd-line / specialized"], "combosLabel": ["Kombinacije", "Combinations"], "nonPharmLabel": ["Nefarmakološke mere", "Non-pharmacological measures"], "cautionsLabel": ["Ključne napomene", "Key cautions"], "chooseSymptom": ["Simptomi", "Symptoms"], "disclaimer": ["Doze su orijentacione i zahtevaju prilagođavanje pacijentu (bubrežna/jetrena funkcija, komorbiditeti, interakcije). Uvek proveriti aktuelni SmPC i lokalnu dostupnost.", "Doses are indicative and require patient-specific adjustment (renal/hepatic function, comorbidities, interactions). Always check the current SmPC and local availability."]}};
+
+// ============= SIMPTOMATSKA TERAPIJA (modul) =============
+function openSymptoms() { state.symptomOpen = true; state.activeSymptom = null; renderSymptomOverlay(); }
+function closeSymptoms() { state.symptomOpen = false; state.activeSymptom = null; const o=document.getElementById('symptomOverlay'); if(o) o.classList.remove('show'); }
+function selectSymptom(id) { state.activeSymptom = id; renderSymptomOverlay(); document.getElementById('symptomScroll').scrollTop = 0; }
+function backToSymptomList() { state.activeSymptom = null; renderSymptomOverlay(); }
+
+function renderSymptomOverlay() {
+  let ov = document.getElementById('symptomOverlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'symptomOverlay';
+    ov.className = 'symptom-overlay';
+    document.body.appendChild(ov);
+  }
+  const i = LI();
+  const ui = SYMPTOM_DATA.moduleUI;
+  const syms = SYMPTOM_DATA.symptoms;
+  let inner = '';
+
+  if (!state.activeSymptom) {
+    // Lista simptoma
+    inner = `
+    <div class="symptom-head">
+      <div class="symptom-head-titles">
+        <p class="symptom-title">${ui.title[i]}</p>
+        <p class="symptom-sub">${ui.sub[i]}</p>
+      </div>
+      <button class="symptom-close" onclick="closeSymptoms()" aria-label="close">&times;</button>
+    </div>
+    <div class="symptom-scroll" id="symptomScroll">
+      <div class="symptom-grid">
+        ${syms.map(s => `
+        <div class="symptom-tile" onclick="selectSymptom('${s.id}')">
+          <span class="symptom-tile-icon">${s.icon}</span>
+          <span class="symptom-tile-name">${s.name[i]}</span>
+        </div>`).join('')}
+      </div>
+      <div class="symptom-disclaimer">${ui.disclaimer[i]}</div>
+      <div class="symptom-back-row"><button class="btn" onclick="closeSymptoms()">&larr; ${ui.backToApp[i]}</button></div>
+    </div>`;
+  } else {
+    const s = syms.find(x => x.id === state.activeSymptom);
+    const tierLabel = (t) => t==='1'?ui.tier1[i]:t==='2'?ui.tier2[i]:ui.tier3[i];
+    const tierClass = (t) => t==='1'?'st-t1':t==='2'?'st-t2':'st-t3';
+    // Grupiši linije po tieru
+    let linesHtml = s.lines.map(ln => `
+      <div class="symptom-line ${tierClass(ln.tier)}">
+        <div class="symptom-line-head">
+          <span class="symptom-tier-badge ${tierClass(ln.tier)}">${tierLabel(ln.tier)}</span>
+          <span class="symptom-drug">${ln.drug[i]}</span>
+        </div>
+        <p class="symptom-detail">${ln.detail[i]}</p>
+      </div>`).join('');
+
+    inner = `
+    <div class="symptom-head">
+      <div class="symptom-head-titles">
+        <p class="symptom-title">${s.icon} ${s.name[i]}</p>
+      </div>
+      <button class="symptom-close" onclick="closeSymptoms()" aria-label="close">&times;</button>
+    </div>
+    <div class="symptom-scroll" id="symptomScroll">
+      <p class="symptom-intro">${s.intro[i]}</p>
+      ${linesHtml}
+      <div class="symptom-block symptom-combos">
+        <p class="symptom-block-title">&#x1F517; ${ui.combosLabel[i]}</p>
+        <p>${s.combos[i]}</p>
+      </div>
+      <div class="symptom-block symptom-nonpharm">
+        <p class="symptom-block-title">&#x1F9D8; ${ui.nonPharmLabel[i]}</p>
+        <p>${s.nonPharm[i]}</p>
+      </div>
+      <div class="symptom-block symptom-cautions">
+        <p class="symptom-block-title">&#x26A0;&#xFE0F; ${ui.cautionsLabel[i]}</p>
+        <p>${s.cautions[i]}</p>
+      </div>
+      <div class="symptom-disclaimer">${ui.disclaimer[i]}</div>
+      <div class="symptom-back-row">
+        <button class="btn" onclick="backToSymptomList()">&larr; ${ui.chooseSymptom[i]}</button>
+        <button class="btn" onclick="closeSymptoms()">${ui.backToApp[i]}</button>
+      </div>
+    </div>`;
+  }
+  ov.innerHTML = `<div class="symptom-panel">${inner}</div>`;
+  ov.classList.add('show');
+  ov.onclick = (e) => { if (e.target.id === 'symptomOverlay') closeSymptoms(); };
+}
+
 
 const renders = {
 
@@ -2917,6 +3076,7 @@ result: () => {
     <p><strong>${L('result.extra_title')}</strong></p>
     ${extras.map(e=>`<p style="margin-top:6px">&middot; ${e}</p>`).join('')}
   </div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -2987,6 +3147,7 @@ switchResult: () => {
   ${strategies.map(s=>`<div class="switch-card ${s.warn?'warn':''}">
     <p class="switch-card-title">${s.warn?'&#9888;&#65039; ':'&#9432; '}${s.title}</p><p>${s.body}</p></div>`).join('')}
   <div class="info-box" style="margin-top:14px"><p>${L('switchResult.general')}</p></div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3036,6 +3197,7 @@ ppmsResult: () => {
     <p style="margin-top:4px">&middot; ${L('ppms.univ3')}</p>
     <p style="margin-top:4px">&middot; ${L('ppms.univ4')}</p>
   </div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3106,6 +3268,7 @@ deescResult: () => {
     <p style="margin-top:4px">&middot; ${L('deesc.p5')}</p>
     <p style="margin-top:4px">&middot; ${L('deesc.p6')}</p>
   </div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3155,6 +3318,7 @@ ppResult: () => {
     <p style="margin-top:4px">&middot; ${L('pp.pp5')}</p>
     <p style="margin-top:4px">&middot; ${L('pp.pp6')}</p>
   </div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3200,6 +3364,7 @@ risResult: () => {
     <p class="switch-card-title">${s.warn?'&#9888;&#65039; ':'&#9432; '}${s.title}</p><p>${s.body}</p></div>`).join('')}
   </div>
   <div class="info-box" style="margin-top:12px"><p>${L('ris.note')}</p></div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3236,6 +3401,7 @@ nrspmsResult: () => {
   ${strategies.map(s=>`<div class="switch-card ${s.warn?'warn':''}">
     <p class="switch-card-title">${s.warn?'&#9888;&#65039; ':'&#9432; '}${s.title}</p><p>${s.body}</p></div>`).join('')}
   <div class="caution-box" style="margin-top:12px"><p>${L('nrspms.note')}</p></div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3277,6 +3443,7 @@ pedResult: () => {
   ${strategies.map(s=>`<div class="switch-card ${s.warn?'warn':''}">
     <p class="switch-card-title">${s.warn?'&#9888;&#65039; ':'&#9432; '}${s.title}</p><p>${s.body}</p></div>`).join('')}
   </div>
+  ${symptomBtn()}
   ${navRow({result:true})}
 </div>`;
 },
@@ -3324,6 +3491,7 @@ jcvCalc: () => {
   ` : ''}
   ${riskHtml}
   <div class="info-box" style="margin-top:14px"><p>${L('jcv.note')}</p></div>
+  ${symptomBtn()}
   <div class="nav-row">
     <button class="btn" onclick="back()">&larr; ${L('ui.back')}</button>
     <button class="copy-summary-btn" onclick="copySummary()">&#x1F4CB; ${L('ui.copySummary')}</button>
@@ -3341,6 +3509,7 @@ function applyStaticTranslations() {
   setTxt('printBtnLabel', L('ui.print'));
   setTxt('installBtnLabel', L('ui.install'));
   setTxt('resetBtnLabel', L('ui.reset'));
+  setTxt('symptomToolLabel', SYMPTOM_DATA.moduleUI.btnLabel[LI()]);
   setTxt('headerTitleEl', L('ui.headerTitle'));
   setTxt('headerSubEl', L('ui.headerSub'));
   setTxt('headerMetaEl', L('ui.headerMeta'));
